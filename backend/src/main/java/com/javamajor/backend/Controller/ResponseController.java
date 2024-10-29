@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.regex.Pattern;
 
 @RestController
 @RequestMapping("/response")
@@ -23,29 +24,53 @@ public class ResponseController {
     ResponseService responseService;
 
     @PostMapping("/save")
-    public ResponseEntity<?> saveResponse(@Valid @RequestBody SaveResponseRequest saveResponseRequest){
-        MultipartFile file = saveResponseRequest.getFile();
+    public ResponseEntity<?> saveResponse(
+                                            @RequestParam("file") MultipartFile file,  @RequestParam("session_id") Integer sessionID,
+                                            @RequestParam("question_id") Integer questionID){
+
+        System.out.println(sessionID);
+        System.out.println(questionID);
+        System.out.println(file);
         if (file.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please upload a file!");
         }
         String uploadDir = "D:/STUDY/Project_uploads/"
-                + saveResponseRequest.getSessionID()
+                + sessionID
                 + "/"
-                + saveResponseRequest.getQuestionID()
+                + questionID
                 + "/";
-        String videoFilePath = responseService.saveVideoFile(file,uploadDir);
-        String audioFilePath  =responseService.saveAudioFile(file,uploadDir);
-        String responseText = responseService.saveResponseText(videoFilePath);
-        if (videoFilePath.equals("") || audioFilePath.equals("") || responseText.equals("")) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("File upload failed or conversion failed");
-        }
-        double[] videoEmotions = responseService.videoEmotions(videoFilePath);
+        System.out.println("In Response Controller");
+        try{String videoFilePath = responseService.saveVideoFile(file,uploadDir);
+            String audioFilePath  =responseService.saveAudioFile(videoFilePath);
+            videoFilePath = videoFilePath.replaceAll(Pattern.quote(".mp4") + "$", "_re.mp4");
+            String responseText = responseService.saveResponseText(videoFilePath);
+            System.out.println(responseText);
+
+            if (videoFilePath.equals("") || audioFilePath.equals("") || responseText.equals("")) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("File upload failed or conversion failed");
+            }
+        System.out.println("All File extractions Successful");
+
         boolean[] audioEmotions = responseService.audioEmotions(audioFilePath);
         boolean[] textEmotions = responseService.textEmotions(responseText);
         double affirmationPercentage = responseService.affirmationPercentage(responseText);
         Integer weightIndex = responseService.weightIndexCalculator(affirmationPercentage);
+            double[] videoEmotions = responseService.videoEmotions(videoFilePath);
+        System.out.println("All Emotion extractions Successful");
+        System.out.println(videoEmotions);
+        System.out.println(audioEmotions);
+        System.out.println(textEmotions);
+        System.out.println(affirmationPercentage);
+        System.out.println(weightIndex);
+        SaveResponseRequest saveResponseRequest = new SaveResponseRequest(sessionID,questionID,file);
         Response r = responseService.saveResponse(saveResponseRequest.saveResponseRequestToResponse(videoFilePath,audioFilePath,responseText,videoEmotions,audioEmotions,textEmotions,affirmationPercentage, weightIndex));
         return ResponseEntity.ok(r);
+        }
+        catch(Exception e){
+            e.printStackTrace();
+            System.out.println(e.getMessage());
+            return ResponseEntity.internalServerError().body(e.getMessage());
+        }
 
     }
 

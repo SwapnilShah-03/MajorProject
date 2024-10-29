@@ -1,38 +1,31 @@
 package com.javamajor.backend.Entity;
 
-
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
-import java.sql.Time;
-import java.util.Date;
-import java.util.List;
-
 @Entity
-@Table(name = "sessions")
+@Table(name = "login-credentials")
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Session {
-
+public class Credential {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY )
     private Integer id;
 
-    @Column(name = "user_id")
     @NotNull
+    @Column(name =  "user_id")
     private Integer userID;
 
-    @Column(name = "session_date")
     @NotNull
-    private Date sessionDate;
+    @Column(name = "password")
+    private String password;
 
-    @Column(name = "total_time")
-    @NotNull
-    private Time totalTime;
-
-
+    public Integer getID() {
+        return id;
+    }
+    public String getPassword(){return password;}
 }

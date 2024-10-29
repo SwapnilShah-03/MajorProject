@@ -29,4 +29,4 @@ if __name__ == "__main__":
   max_score_label = max(prediction[0], key=lambda x: x['score'])['label']
 
   # Print the label
-  print("Predicted emotion:", max_score_label)
+  print("Predicted Text Emotion:", max_score_label)

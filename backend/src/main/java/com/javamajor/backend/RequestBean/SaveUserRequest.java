@@ -58,11 +58,8 @@ public class SaveUserRequest {
     @NotNull
     private String contact;
 
-    @JsonProperty( "category")
-    @NotNull
-    private Category category;
 
-    public User UserRequestToUser(){
+    public User UserRequestToUser(Category c){
         return User.builder()
                 .username(this.username)
                 .sex(this.sex)
@@ -73,9 +70,11 @@ public class SaveUserRequest {
                 .address(this.address)
                 .email(this.email)
                 .contact(this.contact)
-                .category(this.category)
+                .category(c)
                 .build();
     }
+
+    public Integer getAge(){return this.age;}
 
 
 }

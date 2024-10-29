@@ -1,7 +1,11 @@
 package com.javamajor.backend.Entity;
 
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+
+
 public enum Category {
-    EARLY_CHILDHOOD("2-6 Years"),
+    EARLY_CHILDHOOD("0 - 6 Years"),
     MIDDLE_CHILDHOOD("7-11 Years"),
     ADOLESCENCE_CHILDHOOD("12-18 Years"),
     YOUNG_ADULTHOOD("19-29 Years"),

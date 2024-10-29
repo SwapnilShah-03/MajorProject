@@ -14,24 +14,21 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.print.attribute.IntegerSyntax;
 
-@JsonSerialize
-@JsonDeserialize
-@Getter
-@Setter
+
 public class SaveResponseRequest {
 
-    @JsonProperty("session_id")
-    @NotNull
     private Integer sessionID;
 
-    @JsonProperty("question_id")
-    @NotNull
     private Integer questionID;
 
-    @JsonProperty("file")
-    @NotNull
     private MultipartFile file;
 
+   public SaveResponseRequest(Integer sessionID,Integer questionID, MultipartFile file){
+        this.sessionID =sessionID;
+        this.questionID =
+                questionID;
+        this.file = file;
+    }
     public  MultipartFile getFile() {
         return file;
     }

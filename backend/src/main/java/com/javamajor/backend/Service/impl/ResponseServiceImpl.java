@@ -16,6 +16,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class ResponseServiceImpl implements ResponseService {
@@ -25,63 +28,30 @@ public class ResponseServiceImpl implements ResponseService {
 
     @Override
     public String saveVideoFile( MultipartFile file, String filepath) {
+        System.out.println("In save video file service");
        mkDir(filepath);
        String videoFilePath = filepath + file.getOriginalFilename();
        return uploadFile(file,videoFilePath);
     }
 
+
     @Override
-    public String saveAudioFile(MultipartFile file,String filepath){
-        mkDir(filepath);
-        String inputFilePath = filepath + file.getOriginalFilename();
-        String outputFilePath = filepath + "audio.mp3";
-
-        try {
-            // Command to convert MP4 to MP3 using FFmpeg
-            String[] command = {
-                    "ffmpeg",
-                    "-i", inputFilePath,
-                    "-q:a", "0",
-                    "-map", "a",
-                    outputFilePath
-            };
-
-            // Create a ProcessBuilder to run the command
-            ProcessBuilder processBuilder = new ProcessBuilder(command);
-            processBuilder.redirectErrorStream(true);  // Redirect error stream to output
-
-            // Start the process
-            Process process = processBuilder.start();
-
-            // Capture the output of the FFmpeg command
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    System.out.println(line);  // Print the output to the console
-                }
-            }
-
-            // Wait for the process to finish
-            int exitCode = process.waitFor();
-            if (exitCode != 0) {
-                System.err.println("Conversion failed with exit code " + exitCode);
-                return "";
-            } else {
-                System.out.println("Conversion successful! MP3 file created at: " + outputFilePath);
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "";
-        }
-        return outputFilePath;
+    public String saveAudioFile(String videoFilePath){
+        System.out.println("In save audio file service");
+        String scriptPath = "C:/Users/Lightning/Desktop/college/Major_Project_Sem_6_and_7/website/PythonScripts/audio_convert.py";
+        String output = runPythonScript(videoFilePath,scriptPath);
+        String regex = "MP3 File Path:(.+)";
+        String filePath =  extractor(output,regex);
+        System.out.println(filePath);
+        return filePath;
     }
 
     @Override
     public String saveResponseText(String filePath){
-        String scriptPath = "C:/Users/Lightning/Desktop/college/Major Project Sem 6 and 7/website/PythonScripts/convert_and_transcribe.py";
-        // Return the output of the Python script
-        return runPythonScript(filePath,scriptPath);
+        String scriptPath = "C:/Users/Lightning/Desktop/college/Major_Project_Sem_6_and_7/website/PythonScripts/convert_and_transcribe.py";
+        String regex = "Extracted response text:(.+)";
+        String output = runPythonScript(filePath,scriptPath);
+        return extractor(output,regex);
 
     }
 
@@ -92,8 +62,11 @@ public class ResponseServiceImpl implements ResponseService {
 
     @Override
     public double[] videoEmotions(String filePath){
-        String scriptPath = "C:/Users/Lightning/Desktop/college/Major Project Sem 6 and 7/website/PythonScripts/facial_emotion_detection.py";
-        String input = runPythonScript(filePath,scriptPath);
+        String scriptPath = "C:/Users/Lightning/Desktop/college/Major_Project_Sem_6_and_7/website/PythonScripts/facial_emotion_detection.py";
+        String output = runPythonScript(filePath,scriptPath);
+        String regex = "Extracted Video Emotions:\\s*(.+)";
+        String input = extractor(output,regex);
+        System.out.println(input);
         String[] emotionsOrder = {"angry", "disgust", "fear", "happy", "neutral", "sad", "surprise"};
 
         // Parse the input string and get emotion counts
@@ -126,9 +99,10 @@ public class ResponseServiceImpl implements ResponseService {
 
     @Override
     public boolean[] audioEmotions(String filePath){
-        String scriptPath = "C:/Users/Lightning/Desktop/college/Major Project Sem 6 and 7/website/PythonScripts/audio_emotion_detection.py";
-        String predictedEmotion = runPythonScript(filePath,scriptPath);
-
+        String scriptPath = "C:/Users/Lightning/Desktop/college/Major_Project_Sem_6_and_7/website/PythonScripts/audio_emotion_detection.py";
+        String output = runPythonScript(filePath,scriptPath);
+        String regex = "Predicted Audio Emotion:(.+)";
+        String predictedEmotion = extractor(output,regex);
         // Convert predicted emotion to a boolean array
         boolean[] emotionFlags = convertToBooleanArray(predictedEmotion);
 
@@ -139,11 +113,13 @@ public class ResponseServiceImpl implements ResponseService {
 
     @Override
     public boolean[] textEmotions(String textResponse){
-        String scriptPath = "C:/Users/Lightning/Desktop/college/Major Project Sem 6 and 7/website/PythonScripts/text_emotion_detection.py";
-        String predictedEmotion = runPythonScript(textResponse,scriptPath);
-
+        String scriptPath = "C:/Users/Lightning/Desktop/college/Major_Project_Sem_6_and_7/website/PythonScripts/text_emotion_detection.py";
+        String output= runPythonScript(textResponse,scriptPath);
+        String regex = "Predicted Text Emotion:(.+)";
+        String predictedEmotion = extractor(output,regex);
         // Convert predicted emotion to a boolean array
-        boolean[] emotionFlags = convertToBooleanArray(predictedEmotion);
+        String[] emotionsOrder = {"sadness", "joy", "love", "anger", "fear", "surprise"};
+        boolean[] emotionFlags = convertToBooleanArray(predictedEmotion,emotionsOrder);
 
         // Print the boolean array
         System.out.println(Arrays.toString(emotionFlags));
@@ -152,7 +128,7 @@ public class ResponseServiceImpl implements ResponseService {
 
     @Override
     public double affirmationPercentage(String textResponse){
-        String scriptPath = "C:/Users/Lightning/Desktop/college/Major Project Sem 6 and 7/website/PythonScripts/affirmation_detection.py";
+        String scriptPath = "C:/Users/Lightning/Desktop/college/Major_Project_Sem_6_and_7/website/PythonScripts/affirmation_detection.py";
         String affirmationPercentage = runPythonScript(textResponse,scriptPath);
         return Double.parseDouble(affirmationPercentage);
     }
@@ -168,6 +144,23 @@ public class ResponseServiceImpl implements ResponseService {
 
     public static boolean[] convertToBooleanArray(String predictedEmotion) {
         String[] emotionsOrder = {"angry", "disgust", "fear", "happy", "neutral", "sad", "surprise"};
+        boolean[] emotionFlags = new boolean[emotionsOrder.length];
+
+        // Find the index of the predicted emotion and set the corresponding flag to true
+        for (int i = 0; i < emotionsOrder.length; i++) {
+            if (emotionsOrder[i].equalsIgnoreCase(predictedEmotion)) {
+                emotionFlags[i] = true;
+            } else {
+                emotionFlags[i] = false;
+            }
+        }
+
+        return emotionFlags;
+    }
+
+
+    public static boolean[] convertToBooleanArray(String predictedEmotion,String[] emotionsOrder) {
+
         boolean[] emotionFlags = new boolean[emotionsOrder.length];
 
         // Find the index of the predicted emotion and set the corresponding flag to true
@@ -202,20 +195,27 @@ public class ResponseServiceImpl implements ResponseService {
     }
 
     public static String runPythonScript(String filePath, String scriptPath){
+        System.out.println("In python run script function");
+        System.out.println(scriptPath);
+        System.out.println(filePath);
         StringBuilder output = new StringBuilder();
+
         try {
-            String[] cmd = new String[]{"python3", scriptPath, filePath};
+            String[] cmd = new String[]{"python", scriptPath, filePath};
+            System.out.println(cmd);
 
             // ProcessBuilder to execute the command
             ProcessBuilder pb = new ProcessBuilder(cmd);
             pb.redirectErrorStream(true);  // Redirect error stream to the output
-
+            System.out.println("Process Build");
             // Start the process
             Process process = pb.start();
+            System.out.println("Process Start");
 
             // Capture the output of the Python script
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line;
+            System.out.println("Output Captured");
 
             while ((line = reader.readLine()) != null) {
                 output.append(line).append("\n");
@@ -223,16 +223,21 @@ public class ResponseServiceImpl implements ResponseService {
 
             // Wait for the process to finish
             int exitCode = process.waitFor();
+            System.out.println(exitCode);
+            System.out.println(output);
             if (exitCode != 0) {
                 output.append("Error: Python script exited with code ").append(exitCode);
+                System.out.println(output);
                 return "";
             }
 
         } catch (Exception e) {
             e.printStackTrace();
+            System.out.println(e.getMessage());
             return "";
         }
         return output.toString();
+
     }
 
     public static Map<String, Integer> parseEmotionString(String input) {
@@ -254,6 +259,17 @@ public class ResponseServiceImpl implements ResponseService {
         return emotionCounts;
     }
 
+    public static String extractor(String input, String regex) {
+        // Define the regex pattern to match the desired string
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(input);
+
+        // Check if the pattern matches and return the result
+        if (matcher.find()) {
+            return matcher.group(1).trim();  // Get the part after "MP3 File Path:" and trim any leading spaces
+        }
+        return null;  // Return null if no match is found
+    }
 
     @Override
     public List<Response> getResponses(Integer SessionID){

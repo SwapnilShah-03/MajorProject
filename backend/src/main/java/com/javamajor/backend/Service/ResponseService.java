@@ -12,7 +12,7 @@ public interface ResponseService {
 
     String saveResponseText(String filePath);
 
-    String saveAudioFile(MultipartFile file,String filepath);
+    String saveAudioFile(String videoFilePath);
 
     Response saveResponse(Response response);
 

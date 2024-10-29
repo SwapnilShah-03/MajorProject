@@ -56,7 +56,7 @@ if __name__ == "__main__":
   emotion_labels = {0: 'angry', 1: 'disgust', 2: 'fear', 3: 'happy', 4: 'neutral', 5: 'sad', 6: 'surprise'}
 
   # Load the audio model and make predictions
-  audio_model = load_model(r"cnn.h5")
+  audio_model = load_model(r"C:/Users/Lightning/Desktop/college/Major_Project_Sem_6_and_7/website/PythonScripts/cnn.h5")
   audio_features = audio_features.reshape(1, -1)
   predictions_audio = audio_model.predict(audio_features)
   predicted_emotion_index = np.argmax(predictions_audio[0])  # Assuming batch_size=1
@@ -65,7 +65,7 @@ if __name__ == "__main__":
   predicted_emotion_label = emotion_labels[predicted_emotion_index]
 
   # Print the predicted emotion
-  print("Predicted emotion:", predicted_emotion_label)
+  print("Predicted Audio Emotion:", predicted_emotion_label)
   probabilities_array = []
 
   # Iterate through each prediction

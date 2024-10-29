@@ -40,8 +40,8 @@ public class User {
     @NotNull
     private String profession;
 
-    @Column(name = "martial_status")
-    private String martial_status;
+    @Column(name = "marital_status")
+    private String marital_status;
 
     @Column(name = "address")
     @NotNull
@@ -56,6 +56,7 @@ public class User {
     @NotNull
     private String contact;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "category")
     @NotNull
     private Category category;
@@ -68,4 +69,7 @@ public class User {
     public Integer getID(){
         return id;
     }
+
+    public @NotNull Integer getAge() {return age;}
+
 }

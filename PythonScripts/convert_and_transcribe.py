@@ -38,4 +38,4 @@ if __name__ == "__main__":
     extracted_text = extract_text_from_wav(wav_file_path)
 
     # Print the extracted text to be captured by Java
-    print(extracted_text)
+    print("Extracted response text:"+extracted_text)

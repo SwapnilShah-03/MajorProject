@@ -80,10 +80,10 @@ def calculate_polarity(sentence):
 
 
 if __name__ == "__main__":
-    # if len(sys.argv) < 2:
-    #     print("No file path provided!")
-    #     sys.exit(1)
-    # s = calculate_polarity(sys.argv[1])
-    s = calculate_polarity("I am good but sometimes feel down")
+    if len(sys.argv) < 2:
+        print("No file path provided!")
+        sys.exit(1)
+    s = calculate_polarity(sys.argv[1])
+    # s = calculate_polarity("I am good but sometimes feel down")
     print(str(s[1]))
  

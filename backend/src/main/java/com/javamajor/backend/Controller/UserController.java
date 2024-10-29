@@ -1,5 +1,6 @@
 package com.javamajor.backend.Controller;
 
+import com.javamajor.backend.Entity.Category;
 import com.javamajor.backend.Entity.Question;
 import com.javamajor.backend.Entity.User;
 import com.javamajor.backend.RequestBean.SaveQuestionRequest;
@@ -26,7 +27,14 @@ public class UserController {
     @PostMapping("/save")
     public ResponseEntity<User> saveUser(@Valid @RequestBody SaveUserRequest userRequest) {
         System.out.println("Inside User Controller");
-        return ResponseEntity.ok(userService.saveUser(userRequest.UserRequestToUser()));
+        Category c = userService.sortCategory(userRequest.getAge());
+        return ResponseEntity.ok(userService.saveUser(userRequest.UserRequestToUser(c)));
+    }
+
+    @GetMapping("/get/{username}")
+    public ResponseEntity<User> getUser(@PathVariable String username){
+        System.out.println("I am in get user controller for username :" + username);
+        return ResponseEntity.ok(userService.getUser(username));
     }
 
 }

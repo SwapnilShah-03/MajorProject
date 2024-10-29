@@ -24,6 +24,7 @@ public class Result {
     @Column(name =  "user_id")
     private Integer userID;
 
+    @Enumerated(EnumType.STRING)
     @NotNull
     @Column(name = "depression_category")
     private DepressionCategory depressionCategory;

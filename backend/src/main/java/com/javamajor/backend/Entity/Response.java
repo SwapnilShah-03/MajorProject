@@ -60,7 +60,6 @@ public class Response {
     @Column(name = "weight_index")
     private Integer weightIndex;
 
-
     public Integer getweightIndex(){
         return weightIndex;
     }

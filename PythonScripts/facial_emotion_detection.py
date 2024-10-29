@@ -23,15 +23,6 @@ if __name__ == "__main__":
 
   mp4_file_path = sys.argv[1]
   video = VideoFileClip(mp4_file_path)
-
-  # Extract the audio part
-  audio = video.audio
-
-  audio.write_audiofile("audio_text.wav", codec='pcm_s16le', bitrate='44100')
-  # Save the audio as an MP3 file
-  audio.write_audiofile("audio_with_faces.mp3")
-
-
   # Create an array to store frames with detected faces
   frames_with_faces = []
 
@@ -64,7 +55,7 @@ if __name__ == "__main__":
   video.close()
   cv2.destroyAllWindows()
 
-  facial_model = load_model(r"face.h5")
+  facial_model = load_model(r"C:/Users/Lightning/Desktop/college/Major_Project_Sem_6_and_7/website/PythonScripts/face.h5")
   predicted_emotions = []
 
   for face_frame in frames_with_faces:
@@ -102,6 +93,6 @@ if __name__ == "__main__":
       emotion_counter[predicted_emotion_label] += 1
 
   # Print the count of each detected emotion
-  
+  print("Extracted Video Emotions:")
   for emotion, count in emotion_counter.items():
       print(f"{emotion}: {count}")
