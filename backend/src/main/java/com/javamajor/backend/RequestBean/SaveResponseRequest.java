@@ -41,7 +41,7 @@ public class SaveResponseRequest {
         return questionID;
     }
 
-    public Response saveResponseRequestToResponse(String videoFilePath, String audioFilePath, String responseText,double[] videoEmotions,boolean[] audioEmotions,boolean[] textEmotions, double affirmationPerc, Integer weightIndex){
+    public Response saveResponseRequestToResponse(String videoFilePath, String audioFilePath, String responseText,double[] videoEmotions,String audioEmotion,String textEmotion, double affirmationPerc, Integer weightIndex){
         return Response.builder()
                 .sessionID(this.sessionID)
                 .questionID(this.questionID)
@@ -49,9 +49,9 @@ public class SaveResponseRequest {
                 .audioFilePath(audioFilePath)
                 .responseText(responseText)
                 .videoEmotions(videoEmotions)
-                .audioEmotions(audioEmotions)
+                .audioEmotion(audioEmotion)
                 .affirmationPerc(affirmationPerc)
-                .textEmotions(textEmotions)
+                .textEmotion(textEmotion)
                 .weightIndex(weightIndex)
                 .build();
     }

@@ -28,6 +28,7 @@ public class UserController {
     public ResponseEntity<User> saveUser(@Valid @RequestBody SaveUserRequest userRequest) {
         System.out.println("Inside User Controller");
         Category c = userService.sortCategory(userRequest.getAge());
+        System.out.println(c);
         return ResponseEntity.ok(userService.saveUser(userRequest.UserRequestToUser(c)));
     }
 

@@ -24,6 +24,7 @@ public class CredentialController {
     public ResponseEntity<Integer> saveCredentials(@Valid @RequestBody SaveCredentialsRequest saveCredentialsRequest){
         System.out.println("I am in save credential request");
         User user = userService.getUser(saveCredentialsRequest.getUsername());
+        System.out.println(user);
         return ResponseEntity.ok(credentialService.savePassword(saveCredentialsRequest.CredentialRequestToCredential(user.getID())));
     }
 

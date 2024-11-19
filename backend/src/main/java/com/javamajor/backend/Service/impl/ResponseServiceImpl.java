@@ -1,9 +1,13 @@
 package com.javamajor.backend.Service.impl;
 
 
+import com.javamajor.backend.Entity.Question;
 import com.javamajor.backend.Entity.Response;
+import com.javamajor.backend.Entity.Summary;
+import com.javamajor.backend.Repository.QuestionsRepository;
 import com.javamajor.backend.Repository.ResponseRepository;
 import com.javamajor.backend.Service.ResponseService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -12,11 +16,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
+import java.text.DecimalFormat;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,6 +26,9 @@ public class ResponseServiceImpl implements ResponseService {
 
     @Autowired
     ResponseRepository responseRepository;
+
+    @Autowired
+    QuestionsRepository questionsRepository;
 
     @Override
     public String saveVideoFile( MultipartFile file, String filepath) {
@@ -64,6 +68,7 @@ public class ResponseServiceImpl implements ResponseService {
     public double[] videoEmotions(String filePath){
         String scriptPath = "C:/Users/Lightning/Desktop/college/Major_Project_Sem_6_and_7/website/PythonScripts/facial_emotion_detection.py";
         String output = runPythonScript(filePath,scriptPath);
+        System.out.println(output);
         String regex = "Extracted Video Emotions:\\s*(.+)";
         String input = extractor(output,regex);
         System.out.println(input);
@@ -71,19 +76,20 @@ public class ResponseServiceImpl implements ResponseService {
 
         // Parse the input string and get emotion counts
         Map<String, Integer> emotionCounts = parseEmotionString(input);
-
+        System.out.println(emotionCounts);
         // Calculate total frames
         int totalFrames = emotionCounts.values().stream().mapToInt(Integer::intValue).sum();
-
+        System.out.println(totalFrames);
         // Create an array to store the percentage of each emotion in the correct order
         double[] emotionPercentages = new double[emotionsOrder.length];
-
+        System.out.println(emotionPercentages);
         // Calculate the percentage for each emotion and place it in the correct position
+
         for (int i = 0; i < emotionsOrder.length; i++) {
             String emotion = emotionsOrder[i];
             int count = emotionCounts.getOrDefault(emotion, 0);  // Default to 0 if the emotion is missing
             if (totalFrames > 0) {
-                emotionPercentages[i] = (double) count / totalFrames * 100;
+                emotionPercentages[i] = (double) count /(double) totalFrames * 100;
             } else {
                 emotionPercentages[i] = 0; // Handle case where totalFrames is 0 to avoid division by zero
             }
@@ -98,32 +104,34 @@ public class ResponseServiceImpl implements ResponseService {
 
 
     @Override
-    public boolean[] audioEmotions(String filePath){
+    public String audioEmotions(String filePath){
         String scriptPath = "C:/Users/Lightning/Desktop/college/Major_Project_Sem_6_and_7/website/PythonScripts/audio_emotion_detection.py";
         String output = runPythonScript(filePath,scriptPath);
         String regex = "Predicted Audio Emotion:(.+)";
         String predictedEmotion = extractor(output,regex);
+        System.out.println(predictedEmotion);
         // Convert predicted emotion to a boolean array
-        boolean[] emotionFlags = convertToBooleanArray(predictedEmotion);
+//        boolean[] emotionFlags = convertToBooleanArray(predictedEmotion);
 
         // Print the boolean array
-        System.out.println(Arrays.toString(emotionFlags));
-        return emotionFlags;
+        //System.out.println(Arrays.toString(emotionFlags));
+        return predictedEmotion;
     }
 
     @Override
-    public boolean[] textEmotions(String textResponse){
+    public String textEmotions(String textResponse){
         String scriptPath = "C:/Users/Lightning/Desktop/college/Major_Project_Sem_6_and_7/website/PythonScripts/text_emotion_detection.py";
         String output= runPythonScript(textResponse,scriptPath);
         String regex = "Predicted Text Emotion:(.+)";
         String predictedEmotion = extractor(output,regex);
+        System.out.println(predictedEmotion);
         // Convert predicted emotion to a boolean array
-        String[] emotionsOrder = {"sadness", "joy", "love", "anger", "fear", "surprise"};
-        boolean[] emotionFlags = convertToBooleanArray(predictedEmotion,emotionsOrder);
+//        String[] emotionsOrder = {"sadness", "joy", "love", "anger", "fear", "surprise"};
+//        boolean[] emotionFlags = convertToBooleanArray(predictedEmotion,emotionsOrder);
 
         // Print the boolean array
-        System.out.println(Arrays.toString(emotionFlags));
-        return emotionFlags;
+//        System.out.println(Arrays.toString(emotionFlags));
+        return predictedEmotion;
     }
 
     @Override
@@ -136,44 +144,44 @@ public class ResponseServiceImpl implements ResponseService {
     @Override
     public Integer weightIndexCalculator(double affirmationPercentage){
         if (affirmationPercentage > 85){ return 3;}
-        else if(affirmationPercentage > 70){return 2;}
-        else if (affirmationPercentage> 40){return 1;}
+        else if(affirmationPercentage > 60){return 2;}
+        else if (affirmationPercentage> 20){return 1;}
         else {return 0;}
     }
 
 
-    public static boolean[] convertToBooleanArray(String predictedEmotion) {
-        String[] emotionsOrder = {"angry", "disgust", "fear", "happy", "neutral", "sad", "surprise"};
-        boolean[] emotionFlags = new boolean[emotionsOrder.length];
+//    public static boolean[] convertToBooleanArray(String predictedEmotion) {
+//        String[] emotionsOrder = {"angry", "disgust", "fear", "happy", "neutral", "sad", "surprise"};
+//        boolean[] emotionFlags = new boolean[emotionsOrder.length];
+//
+//        // Find the index of the predicted emotion and set the corresponding flag to true
+//        for (int i = 0; i < emotionsOrder.length; i++) {
+//            if (emotionsOrder[i].equalsIgnoreCase(predictedEmotion)) {
+//                emotionFlags[i] = true;
+//            } else {
+//                emotionFlags[i] = false;
+//            }
+//        }
+//
+//        return emotionFlags;
+//    }
 
-        // Find the index of the predicted emotion and set the corresponding flag to true
-        for (int i = 0; i < emotionsOrder.length; i++) {
-            if (emotionsOrder[i].equalsIgnoreCase(predictedEmotion)) {
-                emotionFlags[i] = true;
-            } else {
-                emotionFlags[i] = false;
-            }
-        }
-
-        return emotionFlags;
-    }
-
-
-    public static boolean[] convertToBooleanArray(String predictedEmotion,String[] emotionsOrder) {
-
-        boolean[] emotionFlags = new boolean[emotionsOrder.length];
-
-        // Find the index of the predicted emotion and set the corresponding flag to true
-        for (int i = 0; i < emotionsOrder.length; i++) {
-            if (emotionsOrder[i].equalsIgnoreCase(predictedEmotion)) {
-                emotionFlags[i] = true;
-            } else {
-                emotionFlags[i] = false;
-            }
-        }
-
-        return emotionFlags;
-    }
+//
+//    public static boolean[] convertToBooleanArray(String predictedEmotion,String[] emotionsOrder) {
+//
+//        boolean[] emotionFlags = new boolean[emotionsOrder.length];
+//
+//        // Find the index of the predicted emotion and set the corresponding flag to true
+//        for (int i = 0; i < emotionsOrder.length; i++) {
+//            if (emotionsOrder[i].equalsIgnoreCase(predictedEmotion)) {
+//                emotionFlags[i] = true;
+//            } else {
+//                emotionFlags[i] = false;
+//            }
+//        }
+//
+//        return emotionFlags;
+//    }
 
     public String uploadFile(MultipartFile file,String filePath){
         try {
@@ -261,7 +269,7 @@ public class ResponseServiceImpl implements ResponseService {
 
     public static String extractor(String input, String regex) {
         // Define the regex pattern to match the desired string
-        Pattern pattern = Pattern.compile(regex);
+        Pattern pattern = Pattern.compile(regex, Pattern.DOTALL);
         Matcher matcher = pattern.matcher(input);
 
         // Check if the pattern matches and return the result
@@ -275,4 +283,56 @@ public class ResponseServiceImpl implements ResponseService {
     public List<Response> getResponses(Integer SessionID){
         return responseRepository.findAllBySessionID(SessionID);
     }
-}
+
+    @Override
+    public List<Summary> getSummary(Integer sessionID) {
+        List<Response> r = responseRepository.findAllBySessionID(sessionID);
+        List<Summary> summaryList = new ArrayList<>();  // Initialize the list to store summaries
+        Optional<Question> q;
+        String parseVideoEmotions;
+        String[] emotionsOrder = {"angry", "disgust", "fear", "happy", "neutral", "sad", "surprise"};
+
+        for (int i = 0; i < r.size(); i++) {
+            q = questionsRepository.findById(r.get(i).getQuestionID());
+
+            // Ensure that the question exists (Optional is present)
+            if (q.isPresent()) {
+                parseVideoEmotions = parseVideoEmotions(r.get(i).getVideoEmotions(), emotionsOrder);
+
+                // Add a new Summary to the list
+                summaryList.add(new Summary(
+                        sessionID,
+                        q.get().getQuestion(),
+                        r.get(i).getAudioEmotion(),
+                        r.get(i).getTextEmotion(),
+                        parseVideoEmotions,
+                        r.get(i).getweightIndex()
+                ));
+            }
+        }
+        return summaryList;
+    }
+
+
+    public static String parseVideoEmotions(double[] percentages,String[] emotions){
+        StringBuilder result = new StringBuilder();
+
+        for (int i = 0; i < percentages.length; i++) {
+            if (percentages[i] >0){
+                String formattedPercentage = String.format("%.2f", percentages[i]);
+                // Append the emotion and percentage
+                result.append(emotions[i]).append(": ").append(formattedPercentage).append("%\n");
+            }
+
+        }
+
+        // Print the result
+        System.out.println(result.toString());
+        return result.toString();
+    }
+
+    @Override
+    public void deleteRepsonses(Integer sessionID){
+        responseRepository.deleteBySessionID(sessionID);
+    }
+    }

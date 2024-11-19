@@ -19,7 +19,7 @@ public class ResultServiceImpl implements ResultService {
     @Override
     public Integer sumIndexPoints(List<Response> responses){
         int sumIndexPoints = 0;
-        for(int i=0;i<8;++i){
+        for(int i=0;i<responses.size();++i){
             sumIndexPoints += responses.get(i).getweightIndex();
         }
         return sumIndexPoints;

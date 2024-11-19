@@ -2,6 +2,7 @@ package com.javamajor.backend.Controller;
 
 
 import com.javamajor.backend.Entity.Response;
+import com.javamajor.backend.Entity.Summary;
 import com.javamajor.backend.RequestBean.SaveResponseRequest;
 import com.javamajor.backend.Service.ResponseService;
 import jakarta.validation.Valid;
@@ -51,8 +52,10 @@ public class ResponseController {
             }
         System.out.println("All File extractions Successful");
 
-        boolean[] audioEmotions = responseService.audioEmotions(audioFilePath);
-        boolean[] textEmotions = responseService.textEmotions(responseText);
+        String audioEmotions = responseService.audioEmotions(audioFilePath);
+        String textEmotions = responseService.textEmotions(responseText);
+//            String audioEmotions = "neutral";
+//            String textEmotions = "joy";
         double affirmationPercentage = responseService.affirmationPercentage(responseText);
         Integer weightIndex = responseService.weightIndexCalculator(affirmationPercentage);
             double[] videoEmotions = responseService.videoEmotions(videoFilePath);
@@ -74,9 +77,17 @@ public class ResponseController {
 
     }
 
-    @GetMapping("/get/{session_id}")
-    public ResponseEntity<List<Response>> getAllResponses(@PathVariable Integer sessionID){
-        return ResponseEntity.ok(responseService.getResponses(sessionID));
+    @GetMapping("/get/{sessionID}")
+    public ResponseEntity<List<Summary>> getAllResponses(@PathVariable Integer sessionID){
+        return ResponseEntity.ok(responseService.getSummary(sessionID));
     }
+
+    @PutMapping("/delete/{sessionID}")
+    public ResponseEntity<?> reEvaluate(@PathVariable Integer sessionID){
+        responseService.deleteRepsonses(sessionID);
+        return ResponseEntity.ok("Deletion Successful");
+    }
+
+
 
 }

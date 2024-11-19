@@ -25,19 +25,26 @@ public class ResultController {
 
     @PostMapping("/save")
     public ResponseEntity<Result> saveResult(@Valid @RequestBody SaveResultRequest saveResultRequest){
+        System.out.println(saveResultRequest.getSessionID());
+        System.out.println(saveResultRequest.getUserID());
         List<Response> responses = responseService.getResponses(saveResultRequest.getSessionID());
         Integer sumIndexPoints = resultService.sumIndexPoints(responses);
         DepressionCategory dc = resultService.getDepressionCategory(sumIndexPoints);
         return ResponseEntity.ok(resultService.saveResult(saveResultRequest.saveResultRequestToResult(dc,sumIndexPoints)));
     }
 
-    @GetMapping("/get/{session_id}")
+    @GetMapping("/get_session/{sessionID}")
     public ResponseEntity<Result> getResultBySessionID(@PathVariable Integer sessionID){
         return ResponseEntity.ok(resultService.getResult(sessionID));
     }
 
-    @GetMapping("/get/{user_id}")
+    @GetMapping("/getResults/{userID}")
     public ResponseEntity<List<Result>> getResultByUserID(@PathVariable Integer userID){
-        return ResponseEntity.ok(resultService.getAllResults(userID));
+        System.out.println(userID);
+        List<Result> r = resultService.getAllResults(userID) ;
+        System.out.println(r);
+        return ResponseEntity.ok(r);
     }
+
+
 }

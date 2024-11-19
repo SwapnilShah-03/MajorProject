@@ -49,12 +49,12 @@ public class Response {
     private double[] videoEmotions;
 
     @NotNull
-    @Column(name="audio_emotions")
-    private boolean[] audioEmotions;
+    @Column(name="audio_emotion")
+    private String audioEmotion;
 
     @NotNull
-    @Column(name = "text_emotions")
-    private boolean[] textEmotions;
+    @Column(name = "text_emotion")
+    private String textEmotion;
 
     @NotNull
     @Column(name = "weight_index")
@@ -62,5 +62,22 @@ public class Response {
 
     public Integer getweightIndex(){
         return weightIndex;
+    }
+
+    public @NotNull Integer getQuestionID() {
+        return questionID;
+    }
+
+    public @NotNull String getAudioEmotion() {
+        return audioEmotion;
+    }
+
+    public @NotNull String getTextEmotion() {
+        return textEmotion;
+    }
+
+    @NotNull
+    public double[] getVideoEmotions() {
+        return videoEmotions;
     }
 }

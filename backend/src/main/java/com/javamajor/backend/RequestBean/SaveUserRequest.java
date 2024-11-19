@@ -42,8 +42,8 @@ public class SaveUserRequest {
     @NotNull
     private String profession;
 
-    @JsonProperty( "martial_status")
-    private String martial_status;
+    @JsonProperty( "marital_status")
+    private String marital_status;
 
     @JsonProperty( "address")
     @NotNull
@@ -66,7 +66,7 @@ public class SaveUserRequest {
                 .age(this.age)
                 .date(this.date)
                 .profession(this.profession)
-                .martial_status(this.martial_status)
+                .marital_status(this.marital_status)
                 .address(this.address)
                 .email(this.email)
                 .contact(this.contact)

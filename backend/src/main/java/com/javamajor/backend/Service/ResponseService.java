@@ -1,6 +1,7 @@
 package com.javamajor.backend.Service;
 
 import com.javamajor.backend.Entity.Response;
+import com.javamajor.backend.Entity.Summary;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -18,14 +19,18 @@ public interface ResponseService {
 
     double[] videoEmotions(String filePath);
 
-    boolean[] audioEmotions(String filePath);
+    String audioEmotions(String filePath);
 
-    boolean[] textEmotions(String textResponse);
+    String textEmotions(String textResponse);
 
     double affirmationPercentage(String textResponse);
 
     Integer weightIndexCalculator(double affirmationPercentage);
 
     List<Response> getResponses(Integer SessionID);
+
+    List<Summary> getSummary(Integer sessionID);
+
+    void deleteRepsonses(Integer sessionID);
 
 }

@@ -26,7 +26,11 @@ public class Question {
     @Column(name = "category", nullable = false)
     private Category category;
 
-//
+    public String getQuestion() {
+        return question;
+    }
+
+    //
 //    // Private constructor to enforce the use of the builder
 //    private Question(Builder builder) {
 //        this.id = builder.id;
